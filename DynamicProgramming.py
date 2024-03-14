@@ -36,10 +36,28 @@ def kanpsackSW(maxSize, maxWeight, names, sizes, weights, values):
     '''
     assert len(names) == len(sizes) and len(sizes) == len(weights) and len(weights) == len(values), f"names({len(names)}, sizes({len(sizes)}, weights({len(weights)}), and values({len(values)}) must have equal lengths"
 
-    '''
-    Write your codes below
-    '''
-    return 0, []
+    numItems = len(names)
+    memo = [[(0, None) for _ in range(maxWeight + 1)] for _ in range(maxSize + 1)]
+
+    for i in range(1, maxSize + 1):
+        for j in range(1, maxWeight + 1):
+            for k in range(numItems):
+                if sizes[k] > i or weights[k] > j: continue
+                newV = memo[i - sizes[k]][j - weights[k]][0] + values[k]
+                if memo[i][j][0] < newV:
+                    memo[i][j] = newV, k
+
+    s = maxSize
+    w = maxWeight
+    result = []
+
+    while memo[s][w][1] != None:
+        c = memo[s][w][1]
+        result.append(names[c])
+        s -= sizes[c]
+        w -= weights[c]
+
+    return memo[maxSize][maxWeight][0], result
 
 
 if __name__ == "__main__":
