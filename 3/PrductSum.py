@@ -33,17 +33,42 @@ def createProductSumSequence(sequence, maxIndex):
 
 
 def findProductSum(n):
-    '''
-    Find all product-sum numbers within 2~n
-    '''    
-    return []
+    def recur(min, depth, current):
+        for i in range(min, n+1):
+            if current * i > n: return
+            sequence[depth] = i
+            if depth > 0: result.append(createProductSumSequence(sequence, depth))
+            recur(i, depth+1, current * i)
+
+    sequence = [0 for _ in range(n)]
+    result = []
+
+    recur(2, 0, 1)
+
+    return result
 
 
 def findMinimalProductSum(n):
-    '''
-    Find all a minimal product number for each k in 2<=k<=n
-    '''
-    return []
+    def recur(min, count, current, currentSum):
+        for i in range(min, n + 1):
+            if count >= 2:
+                length = count + current - currentSum
+                if length > n: return
+                if result[length - 2] == 0:
+                    result[length - 2] = current
+                else:
+                    if result[length - 2] > current:
+                        result[length - 2] = current
+
+            if current * i > n ** 2: return
+            recur(i, count+1, current * i, currentSum + i)
+
+
+    result = [0 for _ in range(n - 1)]
+
+    recur(2, 0, 1, 0)
+
+    return result
 
 
 def findMinimalProductSumDivision(n):
