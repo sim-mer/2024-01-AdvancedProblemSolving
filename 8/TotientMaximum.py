@@ -58,11 +58,39 @@ def totientMaximum2(N):
 def totientMaximum3(*Ns):
     answer = []
 
-    for i in Ns:
+    prime = [2, 3]
+    primeMult = [2]
 
+    start = 1
+    while primeMult[-1] < max(Ns):
+        if start == len(prime):
+            prime.append(next_prime(prime))
+
+        primeMult.append(primeMult[-1] * prime[start])
+        start += 1
+
+    for i in Ns:
+        idx = binarySearch(primeMult, i)
+        answer.append(primeMult[idx])
 
     return answer
 
+def next_prime(primes):
+    if not primes:
+        return 2
+
+    current_number = primes[-1] + 1
+
+    while True:
+        is_prime = True
+        for prime in primes:
+            if current_number % prime == 0:
+                is_prime = False
+                break
+        if is_prime:
+            return current_number
+
+        current_number += 1
 
 def totientMinimum(*Ns):
     answer = []
