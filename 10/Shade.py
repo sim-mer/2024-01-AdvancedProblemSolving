@@ -115,8 +115,36 @@ class Board:
                             self.shade[y1][x1] = 1
                             break
 
-    def createShade3(self):        
-        pass
+    def createShade3(self):
+        Lobstacle = AngleRange(None, None, None, None, None, None)
+
+        def checkCell(x, y):
+            angle = self.angleRangeToCell(x, y)
+            if angle.intersectWith(Lobstacle): self.shade[y][x] = 1
+            if self.board[y][x] == 1: Lobstacle.mergeWith(angle)
+
+        boardLen = len(self.board)
+
+        maxDistance = max(boardLen - self.xPlayer, boardLen - self.yPlayer)
+
+        for distance in range(1, maxDistance):
+            i = 0
+            while i < distance:
+                if self.xPlayer - i >= 0 and self.yPlayer + distance < boardLen: checkCell(self.xPlayer - i, self.yPlayer + distance)
+                if self.xPlayer + distance < boardLen and self.yPlayer + i < boardLen: checkCell(self.xPlayer + distance, self.yPlayer + i)
+                if self.xPlayer + i < boardLen and self.yPlayer - distance >= 0: checkCell(self.xPlayer + i, self.yPlayer - distance)
+                if self.xPlayer - distance >= 0 and self.yPlayer - i >= 0: checkCell(self.xPlayer - distance, self.yPlayer - i)
+                i += 1
+                if self.xPlayer + i < boardLen and self.yPlayer + distance < boardLen: checkCell(self.xPlayer + i, self.yPlayer + distance)
+                if self.xPlayer + distance < boardLen and self.yPlayer - i >= 0: checkCell(self.xPlayer + distance, self.yPlayer - i)
+                if self.xPlayer - i >= 0 and self.yPlayer - distance >= 0: checkCell(self.xPlayer - i, self.yPlayer - distance)
+                if self.xPlayer - distance >= 0 and self.yPlayer + i < boardLen: checkCell(self.xPlayer - distance, self.yPlayer + i)
+
+                # checkCell(self.xPlayer + i, self.yPlayer + distance)
+                # checkCell(self.xPlayer + distance, self.yPlayer - i)
+                # checkCell(self.xPlayer - i, self.yPlayer - distance)
+                # checkCell(self.xPlayer - distance, self.yPlayer + i)
+
 
     def shadeToString(self):
         result = []
@@ -237,7 +265,7 @@ if __name__ == "__main__":
     print(f"createShade() with N = {len(board.board)} took {tCreateShade} seconds on average")
    
 
-    '''# Test for after-class problems
+    # Test for after-class problems
     print()
     print("Correctness test for createShade3()")
     correct = True
@@ -302,5 +330,5 @@ if __name__ == "__main__":
         print(f"Average running times of the submitted code {tSubmittedCode:.10f} and createShade2 {tSpeedCompare2:.10f}")
         if tSubmittedCode * 20 < tSpeedCompare2: print("pass")
         else: print("fail")
-        print()'''
+        print()
         
