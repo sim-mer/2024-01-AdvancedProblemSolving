@@ -119,31 +119,32 @@ class Board:
         Lobstacle = AngleRange(None, None, None, None, None, None)
 
         def checkCell(x, y):
-            angle = self.angleRangeToCell(x, y)
-            if angle.intersectWith(Lobstacle): self.shade[y][x] = 1
-            if self.board[y][x] == 1: Lobstacle.mergeWith(angle)
+            if 0 <= x < len(self.board) and 0 <= y < len(self.board):
+                angle = self.angleRangeToCell(x, y)
+                if angle.intersectWith(Lobstacle):
+                    self.shade[y][x] = 1
+                if self.board[y][x] == 1:
+                    Lobstacle.mergeWith(angle)
 
         boardLen = len(self.board)
 
-        maxDistance = max(boardLen - self.xPlayer, boardLen - self.yPlayer)
+        maxDistance = max(self.xPlayer,
+                          self.yPlayer,
+                          boardLen - 1 - self.xPlayer,
+                          boardLen - 1 - self.yPlayer)
 
-        for distance in range(1, maxDistance):
+        for distance in range(1, maxDistance + 1):
             i = 0
             while i < distance:
-                if self.xPlayer - i >= 0 and self.yPlayer + distance < boardLen: checkCell(self.xPlayer - i, self.yPlayer + distance)
-                if self.xPlayer + distance < boardLen and self.yPlayer + i < boardLen: checkCell(self.xPlayer + distance, self.yPlayer + i)
-                if self.xPlayer + i < boardLen and self.yPlayer - distance >= 0: checkCell(self.xPlayer + i, self.yPlayer - distance)
-                if self.xPlayer - distance >= 0 and self.yPlayer - i >= 0: checkCell(self.xPlayer - distance, self.yPlayer - i)
+                checkCell(self.xPlayer - i, self.yPlayer + distance)
+                checkCell(self.xPlayer + distance, self.yPlayer + i)
+                checkCell(self.xPlayer + i, self.yPlayer - distance)
+                checkCell(self.xPlayer - distance, self.yPlayer - i)
                 i += 1
-                if self.xPlayer + i < boardLen and self.yPlayer + distance < boardLen: checkCell(self.xPlayer + i, self.yPlayer + distance)
-                if self.xPlayer + distance < boardLen and self.yPlayer - i >= 0: checkCell(self.xPlayer + distance, self.yPlayer - i)
-                if self.xPlayer - i >= 0 and self.yPlayer - distance >= 0: checkCell(self.xPlayer - i, self.yPlayer - distance)
-                if self.xPlayer - distance >= 0 and self.yPlayer + i < boardLen: checkCell(self.xPlayer - distance, self.yPlayer + i)
-
-                # checkCell(self.xPlayer + i, self.yPlayer + distance)
-                # checkCell(self.xPlayer + distance, self.yPlayer - i)
-                # checkCell(self.xPlayer - i, self.yPlayer - distance)
-                # checkCell(self.xPlayer - distance, self.yPlayer + i)
+                checkCell(self.xPlayer + i, self.yPlayer + distance)
+                checkCell(self.xPlayer + distance, self.yPlayer - i)
+                checkCell(self.xPlayer - i, self.yPlayer - distance)
+                checkCell(self.xPlayer - distance, self.yPlayer + i)
 
 
     def shadeToString(self):
