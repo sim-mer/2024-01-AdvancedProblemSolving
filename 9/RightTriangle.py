@@ -52,6 +52,7 @@ def rightTriangle2(N):
 
     return answer
 
+#//
 
 def speedCompare2(N):
     g = N * N * 2
