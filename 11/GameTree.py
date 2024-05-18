@@ -40,8 +40,9 @@ class PTreePlayer(Player):
 
         def findValue(node, childIndex):
             childNode = node[3][childIndex]
-            a = childNode[2][self.player] / sum(childNode[2])
-            b = self.CONST_C * math.sqrt(math.log(sum(node[2])) / sum(childNode[2]))
+            chSum = sum(childNode[2])
+            a = childNode[2][self.player] / chSum
+            b = self.CONST_C * math.sqrt(math.log(sum(node[2])) / chSum)
             return a + b
 
         coin = [(1, 0), (2, 0), (0, 1), (0, 2)]
@@ -54,34 +55,49 @@ class PTreePlayer(Player):
                 if node[1][0] == 0 and node[1][1] == 0:
                     return
 
-                MAX = (0, -1)
                 flag = False
+                max_tuple = (0, -1)
 
                 for i in range(4):
                     if node[1][0] - coin[i][0] < 0 or node[1][1] - coin[i][1] < 0:
                         continue
-                    if node[3][i] == None:
+                    if node[3][i] is None:
                         addChild(i, coin[i][0], coin[i][1], node)
-                        print(node[3][i][1])
                         maxChild = node[3][i]
                         flag = True
                         break
                     else:
                         value = findValue(node, i)
-                        if value > MAX[1]:
-                            MAX = (i, value)
+                        if value > max_tuple[1]:
+                            max_tuple = (i, value)
 
                 if flag:
                     break
-                node = node[3][MAX[0]]
-                maxChild = node
 
-            #랜덤 시뮬레이션
-            result = runBWGame(maxChild[1][0], maxChild[1][1], RandomPlayer, RandomPlayer, False)
+                maxChild = node[3][max_tuple[0]]
+                node = maxChild
+
+            B = maxChild[1][0]
+            W = maxChild[1][1]
+            result = maxChild[0]
+            if B != 0 or W != 0:
+                while True:
+                    if B == 0 and W == 0:
+                        break
+                    result = (result + 1) % 2
+                    if (B == 1 and W == 0) or (B == 0 and W == 1):
+                        break
+                    elif B >= 2:
+                        B -= random.randint(1, 2)
+                    elif W >= 2:
+                        W -= random.randint(1, 2)
+                    elif B == 1:
+                        B -= 1
+                    elif W == 1:
+                        W -= 1
+
             simCount += 1
-
-            #시뮬레이션 결과에 따라 maxChild -> root까지 승리 횟수 추가
-            while maxChild != None:
+            while maxChild is not None:
                 maxChild[2][result] += 1
                 maxChild = maxChild[4]
 
@@ -267,79 +283,79 @@ if __name__ == "__main__":
     correct = True
     
     ws22 = True
-    for i in range(1):
+    for i in range(10):
         t = PTreePlayer(1, 1, 0)
         if t.root[2] != [4, 0]: ws22 = False
     if ws22: print("P ", end='')
-    else: 
+    else:
         print("F ", end='')
         correct = False
 
-    # ws22, ws32 = False, False
-    # for i in range(10):
-    #     t = PTreePlayer(2, 1, 0)
-    #     if t.root[2] == [2, 2]: ws22 = True
-    #     elif t.root[2] == [3, 2]: ws32 = True
-    # if ws22 and ws32: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # t = PTreePlayer(100, 100, 0)
-    # if sum(t.root[2]) == t.maxNumSimulations: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # t = PTreePlayer(1000, 1000, 0)
-    # if sum(t.root[2]) == t.maxNumSimulations: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # numWins = [0, 0]
-    # for i in range(10):
-    #     numWins[runBWGame(3, 3, PTreePlayer, RandomPlayer, False)] += 1
-    # if numWins == [10, 0]: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # numWins = [0, 0]
-    # for i in range(20):
-    #     numWins[runBWGame(5, 5, PTreePlayer, RandomPlayer, False)] += 1
-    # if numWins[0] >= 14: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # numWins = [0, 0]
-    # for i in range(20):
-    #     numWins[runBWGame(0, 30, RandomPlayer, PTreePlayer, False)] += 1
-    # if numWins[1] >= 14: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # numWins = [0, 0]
-    # for i in range(20):
-    #     numWins[runBWGame(20, 20, RandomPlayer, PTreePlayer, False)] += 1
-    # if numWins[1] >= 14: print("P ", end='')
-    # else:
-    #     print("F ", end='')
-    #     correct = False
-    #
-    # print()
-    # print()
-    # print("Speed test for expandTree()")
-    # if not correct: print("fail (since the algorithm is not correct)")
-    # else:
-    #     numCoins, repeat = 4, 20
-    #     tSpeedCompare1 = timeit.timeit(lambda: runBWGame(numCoins, numCoins, TreePlayer, RandomPlayer, False), number=repeat)/repeat
-    #     tSubmittedCode = timeit.timeit(lambda: runBWGame(numCoins, numCoins, PTreePlayer, RandomPlayer, False), number=repeat)/repeat
-    #     print(f"For {numCoins} coins")
-    #     print(f"Average running times of the submitted code {tSubmittedCode:.10f} and TreePlayer {tSpeedCompare1:.10f}")
-    #     if tSubmittedCode * 4 < tSpeedCompare1: print("pass")
-    #     else: print("fail")
-    #     print()
-        
+    ws22, ws32 = False, False
+    for i in range(10):
+        t = PTreePlayer(2, 1, 0)
+        if t.root[2] == [2, 2]: ws22 = True
+        elif t.root[2] == [3, 2]: ws32 = True
+    if ws22 and ws32: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    t = PTreePlayer(100, 100, 0)
+    if sum(t.root[2]) == t.maxNumSimulations: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    t = PTreePlayer(1000, 1000, 0)
+    if sum(t.root[2]) == t.maxNumSimulations: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    numWins = [0, 0]
+    for i in range(10):
+        numWins[runBWGame(3, 3, PTreePlayer, RandomPlayer, False)] += 1
+    if numWins == [10, 0]: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    numWins = [0, 0]
+    for i in range(20):
+        numWins[runBWGame(5, 5, PTreePlayer, RandomPlayer, False)] += 1
+    if numWins[0] >= 14: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    numWins = [0, 0]
+    for i in range(20):
+        numWins[runBWGame(0, 30, RandomPlayer, PTreePlayer, False)] += 1
+    if numWins[1] >= 14: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    numWins = [0, 0]
+    for i in range(20):
+        numWins[runBWGame(20, 20, RandomPlayer, PTreePlayer, False)] += 1
+    if numWins[1] >= 14: print("P ", end='')
+    else:
+        print("F ", end='')
+        correct = False
+
+    print()
+    print()
+    print("Speed test for expandTree()")
+    if not correct: print("fail (since the algorithm is not correct)")
+    else:
+        numCoins, repeat = 4, 20
+        tSpeedCompare1 = timeit.timeit(lambda: runBWGame(numCoins, numCoins, TreePlayer, RandomPlayer, False), number=repeat)/repeat
+        tSubmittedCode = timeit.timeit(lambda: runBWGame(numCoins, numCoins, PTreePlayer, RandomPlayer, False), number=repeat)/repeat
+        print(f"For {numCoins} coins")
+        print(f"Average running times of the submitted code {tSubmittedCode:.10f} and TreePlayer {tSpeedCompare1:.10f}")
+        if tSubmittedCode * 4 < tSpeedCompare1: print("pass")
+        else: print("fail")
+        print()
+
