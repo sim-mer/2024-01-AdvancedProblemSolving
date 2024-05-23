@@ -8,8 +8,64 @@ def monopoly(numSides, numIterations):
                    "JAIL","C1","U1","C2","C3","R2","D1","CC2","D2","D3",\
                    "FP","E1","CH2","E2","E3","R3","F1","F2","U2","F3",\
                    "G2J","G1","G2","CC3","G3","R4","CH3","H1","T2","H2"]
-    
-    return [(square, 1/len(squares)) for square in squares]
+
+    def dice_probability(n):
+        probabilities = []
+        for k in range(2, 2 * n + 1):
+            if k <= n + 1:
+                probability = (k - 1) / (n * n)
+            else:
+                probability = (2 * n + 1 - k) / (n * n)
+            probabilities.append(probability)
+        return probabilities
+
+    dice = dice_probability(numSides)
+    print(dice)
+
+    probCurrent = [0 for _ in range(40)]
+    probCurrent[0] = 1
+    probTransition = []
+    for sx in range(40):
+        probTransitionSx = [0 for _ in range(40)]
+        for n in range(2, len(dice) + 2):
+            current = (sx + n) % 40
+            probability = dice[n - 2]
+            if current == 30: # G2J
+                probTransitionSx[10] += probability
+                continue
+            elif current == 2 or current == 17 or current == 33: # CC
+                probTransitionSx[0] += probability * (1 / 16)
+                probTransitionSx[10] += probability * (1 / 16)
+                probTransitionSx[current] += probability * (14 / 16)
+                continue
+            elif current == 7 or current == 22 or current == 36:
+                probTransitionSx[0] += probability * (1 / 16) # GO
+                probTransitionSx[10] += probability * (1 / 16) # JAIL
+                probTransitionSx[11] += probability * (1 / 16) # C1
+                probTransitionSx[24] += probability * (1 / 16) # E3
+                probTransitionSx[39] += probability * (1 / 16) # H2
+                probTransitionSx[5] += probability * (1 / 16) # R1
+                # r은 5, 15, 25, 35
+                if current == 7: probTransitionSx[15] += probability * (1 / 16)
+                elif current == 22: probTransitionSx[25] += probability * (1 / 16)
+                elif current == 33: probTransitionSx[35] += probability * (1 / 16)
+                # u는 12, 28
+                if current == 7 or current == 33: probTransitionSx[12] += probability * (1 / 16)
+                elif current == 22: probTransitionSx[28] += probability * (1 / 16)
+                probTransitionSx[(current + 37) % 40] += probability * (1 / 16) # back 3 squares
+                probTransitionSx[current] += probability * (6 / 16)
+                continue
+            probTransitionSx[current] += probability
+        probTransition.append(probTransitionSx)
+
+    for i in range(numIterations):
+        probNext = [0 for _ in range(len(probCurrent))]
+        for sx in range(len(probTransition)):
+            for sy in range(len(probTransition[sx])):
+                probNext[sy] += probTransition[sx][sy] * probCurrent[sx]
+        probCurrent = probNext
+
+    return [(squares[sx], probCurrent[sx]) for sx in range(40)]
 
 
 def simpleGame(numSquares, numSides, numIterations, debug):
@@ -31,7 +87,7 @@ def simpleGame(numSquares, numSides, numIterations, debug):
         probTransitionSx = [0 for _ in range(numSquares)]
         for n in range(1, numSides + 1):
             probTransitionSx[(sx + n) % numSquares] += 1 / numSides
-        probTransition.append(probTransitionSx)    
+        probTransition.append(probTransitionSx)
 
     for i in range(numIterations):
         probNext = [0 for _ in range(len(probCurrent))]
@@ -45,6 +101,8 @@ def simpleGame(numSquares, numSides, numIterations, debug):
 
 
 if __name__ == "__main__":
+    monopoly(6, 2)
+
     '''
     Test for in-class problems
     '''
@@ -55,7 +113,7 @@ if __name__ == "__main__":
     '''
     Test for after-class problems
     '''
-    '''print()
+    print()
     print("Correctness test for monopoly()")
     print(" for each case, if your answer does not appear within 2 seconds, consider that you failed the case")
     correct = True
@@ -95,6 +153,7 @@ if __name__ == "__main__":
         print(result)
         correct = False
 
+    '''
     numSides, numIterations = 6, 1
     result = equal(monopoly(numSides, numIterations), [("GO", 6/36*1/16+1/36*1/16), ("A1", 0), ("CC1", 1/36*14/16), ("A2", 2/36), ("T1", 3/36+6/36*1/16), ("R1", 4/36+6/36*1/16), ("B1", 5/36), ("CH1", 6/36*6/16), ("B2", 5/36), ("B3", 4/36),\
                    ("JAIL", 3/36+1/36*1/16+6/36*1/16), ("C1", 2/36+6/36*1/16), ("U1", 1/36+6/36*1/16), ("C2", 0), ("C3", 0), ("R2", 6/36*2/16), ("D1", 0), ("CC2", 0), ("D2", 0), ("D3", 0),\
