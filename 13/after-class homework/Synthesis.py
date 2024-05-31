@@ -98,9 +98,16 @@ def model1(param, input, output):
     output = outputEncoded
 
     # Write codes below
-    
+    a = input[0] + input[1] + input[2] + input[3] + input[4] - output[0]
+    v = output[1] * param[1] + param[2] + (a ** 2 * param[0])
 
-    return 0
+    '''
+    먼저 output[1]과 param[1]을 곱한 이유는 짝수를 찾는 연산일 경우 output[1]의 값이 -100이 아닐 경우가 있으므로 그 만큼 연산에서의 구분을 두기 위해서이다.
+    따라서 합을 구하는 연산일 경우 모델 결과 값에 0이 더해지거나 -100이 더해지기에 합을 구하는 연산을 구별할 수 있고 
+    짝수를 찾는 연산일 경우 output[1]이 -100이 아닐때 그 만큼 값을 더해주고 param[2]를 더해주어 bias로 구분할 수 있다.
+    그리고 마지막으로 a는 input과 output의 차이기에 이 값을 제곱한다면 무조건 양수고 이를 이용해 연산을 구분할 수 있다.
+    '''
+    return v
 
 
 if __name__ == "__main__":  
@@ -108,7 +115,7 @@ if __name__ == "__main__":
     Test for after-class problems
     '''    
     model = model1
-    paramList = [[2, 0, 4], [-10, 1, 3]]
+    paramList = [[0, 0, 0], [1, 1, 99]]
     assert len(paramList[0]) == len(paramList[1]), f"the lengths of parameter lists ({len(paramList[0])}, {len(paramList[1])}) must be equal)"
 
     print()
